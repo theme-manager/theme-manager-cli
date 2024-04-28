@@ -19,4 +19,5 @@ Download the shell script and put it in your ```$HOME/.config/theme-manager``` d
 Do the same for the theme-generator.  
 
 ## Dependencies
-theme-generator: [https://github.com/zweiler1/theme-generator](https://github.com/zweiler1/theme-generator)
+theme-generator: [https://github.com/zweiler1/theme-generator](https://github.com/zweiler1/theme-generator)  
+theme-applier: [https://github.com/zweiler1/theme-applier](https://github.com/zweiler1/theme-applier)

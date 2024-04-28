@@ -10,7 +10,7 @@ printUsage() {
     echo "  -d  --delete    <name>              Delete theme"
     echo "  -h  --help                          Show this help message"
     echo "  -l  --list                          List themes"
-    echo "  -s  --set       <name>              Set theme"
+    echo "  -s  --set       <name> [apply]      Set theme, optionally apply [1|0]"
     echo "  -u  --update    <name> <imagePath>  Update theme"
     #echo "  -p  --path      <path>              Theme directory. Default directory is $HOME/.config/themes/"
 }
@@ -88,6 +88,10 @@ setTheme() {
     fi
     rm -r "$HOME/.config/themes/active/"
     cp -r "$HOME/.config/themes/$1/" "$HOME/.config/themes/active/"
+
+    if [ "$2" = "1" ]; then
+        sh "$HOME/.config/theme-applier/theme-applier.sh"
+    fi
 }
 
 # check if usage has to be printed
@@ -137,7 +141,7 @@ case "$1" in
         printUsage
         exit 1
     fi
-    setTheme "$2" ;;
+    setTheme "$2" "$3" ;;
 *)
     echo "Unknown option: $1"
     echo
