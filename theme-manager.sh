@@ -12,22 +12,60 @@ printUsage() {
     echo "  -l  --list                          List themes"
     echo "  -s  --set       <name> [apply]      Set theme, optionally apply [1|0]"
     echo "  -u  --update    <name> <imagePath>  Update theme"
-    #echo "  -p  --path      <path>              Theme directory. Default directory is $HOME/.config/themes/"
+}
+
+# error codes
+# 0 - success
+# 1 - missing argument(s)
+# 2 - wrong argument(s)
+# 3 - missing dependecy
+# 4 - wrong configuration file
+# 5 - internal error
+
+themesPath="$HOME/.config/themes"
+generatorPath="$HOME/gitclones/theme-generator"
+applierPath="$HOME/gitclones/theme-applier"
+
+if [ "$themesPath" = "" ]; then
+    echo "Theme directory not set!"
+    exit 4
+fi
+
+createDefaultCss() {
+    if ! [ -d "$1" ]; then
+        echo "Failed to create default css file, which internally uses the themes colors!"
+        exit 5
+    fi
+    echo "Creating default css..."
+    {   echo "@import './colors/colors-gtk.css';"
+        echo ""
+        echo "@define-color backgroundColor @color0;"
+        echo "@define-color detailColor @color1;"
+        echo "@define-color hoverColor @color2;"
+        echo "@define-color borderColor @color3;"
+        echo "@define-color textColor @color4;"
+        echo "@define-color transparent rgba(0, 0, 0, 0);"
+    } > "$1/colors.css"
 }
 
 checkIfThemeExists() {
     themeExists=false
-    for file in "$HOME/.config/themes/"*; do
+    for file in "$themesPath/"*; do
         if [ "$(basename "$file")" = "$1" ]; then
             themeExists=true
         fi
     done
-    if ! $themeExists; then
-        echo "No theme with name '$1' exists, so it cannot be updated!"
-        echo "Use the '--list' option to get all available themes." 
-        exit 2
+    if $themeExists; then
+        echo 0
+    else 
+        echo 1
     fi
-    return $themeExists
+}
+
+printNoThemeFoundError() {
+    echo "No theme with name '$1' exists!"
+    echo "Use the '--list' option to get all available themes." 
+    exit 2
 }
 
 createTheme() {
@@ -40,18 +78,41 @@ createTheme() {
         exit 2
     fi
 
-    mkdir -p "$HOME/.config/themes/$2/"
-    sh "$HOME/.config/theme-generator/theme-generator.sh" "$2" -f pgh -o "$HOME/.config/themes/$1/"
+    if [ "$(checkIfThemeExists "$1")" = "0" ]; then
+        echo "Theme with name '$1' already exists!"
+        echo "Please choose a other name."
+        echo "Use the '--list' option to get all available themes."
+        exit 2 
+    fi
+
+    mkdir -p "$themesPath/$1/colors/"
+    "$generatorPath/theme-generator.sh" "$2" -f pghtr -o "$themesPath/$1/colors/"
+    success=$?
+    if [ "$success" = "0" ]; then
+        createDefaultCss "$themesPath/$1/"
+        echo "Successfully created theme '$1'"
+    fi
 }
 
 updateTheme() {
+    if [ "$1" = "active" ]; then
+        echo "The name 'active' is reserved! It cannot be updated."
+        exit 2
+    fi
     if ! [ -f "$2" ]; then
         echo "Specified image '$2' does not exist!"
         exit 2
     fi
-    checkIfThemeExists "$1"
 
-    sh "$HOME/.config/theme-generator/theme-generator.sh" "$2" -f pgh -o "$HOME/.config/themes/$1/"
+    if [ "$(checkIfThemeExists "$1")" = "1" ]; then
+        printNoThemeFoundError "$1"
+    fi
+
+    "$generatorPath/theme-generator.sh" "$2" -f pgh -o "$themesPath/$1/colors/"
+    success=$?
+    if [ "$success" = "0" ]; then
+        echo "Successfully updated theme '$1'!"
+    fi
 }
 
 deleteTheme() {
@@ -60,37 +121,46 @@ deleteTheme() {
         exit 2
     fi
 
-    checkIfThemeExists "$1"
-
-    if [ -d "$HOME/.config/themes/$1/" ]; then
-        rm -r "$HOME/.config/themes/$1/"
+    if [ "$(checkIfThemeExists "$1")" = "1" ]; then
+        printNoThemeFoundError "$1"
     fi
+
+    if [ -d "$themesPath/$1/" ]; then
+        rm -r "${themesPath:?}/$1/"
+    fi
+
+    echo "Successfully deleted theme '$1'!"
 }
 
 listThemes() {
-    for theme in "$HOME/.config/themes/"*; do
-        if ! [ "$theme" = "active" ]; then
-            echo "$theme"
+    for theme in "$themesPath/"*; do
+        if [ -d "$theme/" ]; then
+            themeName=$(basename "$theme")
+            if ! [ "$themeName" = "active" ]; then
+                echo "$themeName"
+            fi
         fi
     done
 }
 
 setTheme() {
     if [ "$1" = "active" ]; then
-        echo "The name 'active' is reserved! It cannot be deleted."
+        echo "The name 'active' is reserved! It cannot be set to."
         exit 2
     fi
 
-    checkIfThemeExists "$1"
-
-    if [ -d "$HOME/.config/themes/active/" ]; then
-        mkdir -p "$HOME/.config/themes/active/"
+    if [ "$(checkIfThemeExists "$1")" = "1" ]; then
+        printNoThemeFoundError "$1"
     fi
-    rm -r "$HOME/.config/themes/active/"
-    cp -r "$HOME/.config/themes/$1/" "$HOME/.config/themes/active/"
+
+    if [ -d "$themesPath/active/" ]; then
+        mkdir -p "$themesPath/active/"
+    fi
+    rm -r "$themesPath/active/"
+    cp -r "$themesPath/$1/" "$themesPath/active/"
 
     if [ "$2" = "1" ]; then
-        sh "$HOME/.config/theme-applier/theme-applier.sh"
+        "$applierPath/theme-applier.sh"
     fi
 }
 
@@ -101,9 +171,15 @@ if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 
 # check if theme-generator is installed
-if ! [ -f "$HOME/.config/theme-generator/theme-generator.sh" ]; then
+if ! [ -f "$generatorPath/theme-generator.sh" ]; then
     echo "theme-generator is not installed!"
-    exit 1
+    exit 3
+fi
+
+# check if theme-applier is installed
+if ! [ -f "$applierPath/theme-applier.sh" ]; then
+    echo "theme-applier is not installed!"
+    exit 3
 fi
 
 # execute option
@@ -146,5 +222,5 @@ case "$1" in
     echo "Unknown option: $1"
     echo
     printUsage
-    exit 1 ;;
+    exit 2 ;;
 esac
