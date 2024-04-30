@@ -23,8 +23,8 @@ printUsage() {
 # 5 - internal error
 
 themesPath="$HOME/.config/themes"
-generatorPath="$HOME/gitclones/theme-generator"
-applierPath="$HOME/gitclones/theme-applier"
+generatorPath="$HOME/gitclones/theme-manager/theme-generator"
+applierPath="$HOME/gitclones/theme-manager/theme-applier"
 
 if [ "$themesPath" = "" ]; then
     echo "Theme directory not set!"
@@ -129,7 +129,7 @@ deleteTheme() {
         rm -r "${themesPath:?}/$1/"
     fi
 
-    echo "Successfully deleted theme '$1'!"
+    echo "Successfully deleted theme '$1'"
 }
 
 listThemes() {
@@ -172,13 +172,13 @@ fi
 
 # check if theme-generator is installed
 if ! [ -f "$generatorPath/theme-generator.sh" ]; then
-    echo "theme-generator is not installed!"
+    echo "theme-generator is not installed"
     exit 3
 fi
 
 # check if theme-applier is installed
 if ! [ -f "$applierPath/theme-applier.sh" ]; then
-    echo "theme-applier is not installed!"
+    echo "theme-applier is not installed"
     exit 3
 fi
 
@@ -186,7 +186,7 @@ fi
 case "$1" in
 -c | --create)
     if [ "$2" = "" ] || [ "$3" = "" ]; then
-        echo too few arguments for option "$1"!
+        echo too few arguments for option "$1"
         echo
         printUsage
         exit 1
@@ -194,7 +194,7 @@ case "$1" in
     createTheme "$2" "$3" ;;
 -u | --update)
     if [ "$2" = "" ] || [ "$3" = "" ]; then
-        echo too few arguments for option "$1"!
+        echo too few arguments for option "$1"
         echo
         printUsage
         exit 1
@@ -202,7 +202,7 @@ case "$1" in
     updateTheme "$2" "$3" ;;
 -d | --delete)
     if [ "$2" = "" ]; then
-        echo "missing <name> argument for option $1"!
+        echo "missing <name> argument for option $1"
         echo
         printUsage
         exit 1
@@ -212,7 +212,7 @@ case "$1" in
     listThemes ;;
 -s | --set)
     if [ "$2" = "" ]; then
-        echo "missing <name> argument for option $1"!
+        echo "missing <name> argument for option $1"
         echo
         printUsage
         exit 1
