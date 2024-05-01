@@ -10,7 +10,7 @@ printUsage() {
     echo "  -d  --delete    <name>              Delete theme"
     echo "  -h  --help                          Show this help message"
     echo "  -l  --list                          List themes"
-    echo "  -s  --set       <name> [apply]      Set theme, optionally apply [1|0]"
+    echo "  -s  --set       <name> (apply)      Set theme, optionally apply [1|0]"
     echo "  -u  --update    <name> <imagePath>  Update theme"
 }
 
@@ -111,7 +111,7 @@ updateTheme() {
     "$generatorPath/theme-generator.sh" "$2" -f pgh -o "$themesPath/$1/colors/"
     success=$?
     if [ "$success" = "0" ]; then
-        echo "Successfully updated theme '$1'!"
+        echo "Successfully updated theme '$1'"
     fi
 }
 
@@ -162,6 +162,9 @@ setTheme() {
     if [ "$2" = "1" ]; then
         "$applierPath/theme-applier.sh"
     fi
+    "$applierPath"/theme-applier.sh
+    #killall waybar 
+    #waybar &
 }
 
 # check if usage has to be printed
