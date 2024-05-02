@@ -166,6 +166,13 @@ setTheme() {
     #waybar &
 }
 
+printTooFewArguments() {
+    echo "too few arguments for option '$1'"
+    echo
+    printUsage
+    exit 1
+}
+
 # check if usage has to be printed
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     printUsage
@@ -185,44 +192,33 @@ if ! [ -f "$applierPath/theme-applier.sh" ]; then
 fi
 
 # execute option
-case "$1" in
--c | --create)
-    if [ "$2" = "" ] || [ "$3" = "" ]; then
-        echo too few arguments for option "$1"
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -h | --help) 
+        printUsage && exit0 ;;
+    -c | --create)
+        { [ "$2" = "" ] || [ "$3" = "" ]; } && printTooFewArguments "$1"
+        createTheme "$2" "$3"
+        shift 3 ;;
+    -u | --update)
+        { [ "$2" = "" ] && [ "$3" = "" ]; } && printTooFewArguments "$1"
+        updateTheme "$2" "$3" 
+        shift 3 ;;
+    -d | --delete)
+        [ "$2" = "" ] && printTooFewArguments "$1"
+        deleteTheme "$2"
+        shift 2 ;;
+    -l | --list)
+        listThemes 
+        shift ;;
+    -s | --set)
+        [ "$2" = "" ] && printTooFewArguments "$1"
+        setTheme "$2" 
+        shift 2 ;;
+    *)
+        echo "Unknown option: $1"
         echo
         printUsage
-        exit 1
-    fi
-    createTheme "$2" "$3" ;;
--u | --update)
-    if [ "$2" = "" ] || [ "$3" = "" ]; then
-        echo too few arguments for option "$1"
-        echo
-        printUsage
-        exit 1
-    fi
-    updateTheme "$2" "$3" ;;
--d | --delete)
-    if [ "$2" = "" ]; then
-        echo "missing <name> argument for option $1"
-        echo
-        printUsage
-        exit 1
-    fi
-    deleteTheme "$2" ;;
--l | --list)
-    listThemes ;;
--s | --set)
-    if [ "$2" = "" ]; then
-        echo "missing <name> argument for option $1"
-        echo
-        printUsage
-        exit 1
-    fi
-    setTheme "$2" "$3" ;;
-*)
-    echo "Unknown option: $1"
-    echo
-    printUsage
-    exit 2 ;;
-esac
+        exit 2 ;;
+    esac
+done
