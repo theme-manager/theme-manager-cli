@@ -2,16 +2,15 @@
 
 # functions
 printUsage() {
-    echo "Usage:"
-    echo "  theme-manager.sh [OPTIONS]"
-    echo
-    echo "Options:"
-    echo "  -c  --create    <name> <imagePath>  Create theme"
-    echo "  -d  --delete    <name>              Delete theme"
-    echo "  -h  --help                          Show this help message"
-    echo "  -l  --list                          List themes"
-    echo "  -s  --set       <name> (apply)      Set theme, optionally apply [1|0]"
-    echo "  -u  --update    <name> <imagePath>  Update theme"
+    echo "Usage:
+    theme-manager.sh [OPTIONS]
+Options:
+    -c  --create    <name> <imagePath>  Create theme
+    -d  --delete    <name>              Delete theme
+    -h  --help                          Show this help message
+    -l  --list                          List themes
+    -s  --set       <name> (apply)      Set theme, optionally apply [1|0]
+    -u  --update    <name> <imagePath>  Update theme"
 }
 
 # error codes
@@ -86,7 +85,7 @@ createTheme() {
     fi
 
     mkdir -p "$themesPath/$1/colors/"
-    "$generatorPath/theme-generator.sh" "$2" -f pghtr -o "$themesPath/$1/colors/"
+    "$generatorPath/theme-generator.sh" "$2" -o "$themesPath/$1/colors/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         createDefaultCss "$themesPath/$1/"
@@ -108,7 +107,7 @@ updateTheme() {
         printNoThemeFoundError "$1"
     fi
 
-    "$generatorPath/theme-generator.sh" "$2" -f pgh -o "$themesPath/$1/colors/"
+    "$generatorPath/theme-generator.sh" "$2" -o "$themesPath/$1/colors/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         echo "Successfully updated theme '$1'"
