@@ -3,6 +3,10 @@ The theme-manager is the frontend for the theme-generator. It is used to create,
 With the theme-manager the active theme can be set.  
 If connected to the change event of the wallpaper, the theme will be changed automatically. 
 
+## Installation
+The installation is easy. Just put the shell script in your ```$HOME/.config/theme-manager``` directory.  
+Make sure that dependencies are installed.
+
 ## Usage
     theme-manager.sh [OPTIONS]
 
