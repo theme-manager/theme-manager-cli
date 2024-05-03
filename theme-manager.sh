@@ -21,13 +21,10 @@ Options:
 # 4 - wrong configuration file
 # 5 - internal error
 
-themesPath="$HOME/.config/themes"
-generatorPath="$HOME/gitclones/theme-manager/theme-generator"
-applierPath="$HOME/gitclones/theme-manager/theme-applier"
+managerPath="$HOME/.config/theme-manager"
 
-if [ "$themesPath" = "" ]; then
-    echo "Theme directory not set!"
-    exit 4
+if ! [ -d "$managerPath/themes" ]; then
+    mkdir -p "$managerPath/themes"
 fi
 
 createDefaultCss() {
@@ -49,7 +46,7 @@ createDefaultCss() {
 
 checkIfThemeExists() {
     themeExists=false
-    for file in "$themesPath/"*; do
+    for file in "$managerPath/themes/"*; do
         if [ "$(basename "$file")" = "$1" ]; then
             themeExists=true
         fi
@@ -72,8 +69,8 @@ createTheme() {
         echo "Specified image '$2' does not exist!"
         exit 2
     fi
-    if [ "$1" = "active" ]; then
-        echo "The name 'active' is reserved!"
+    if [ "$1" = "active" ] || [ "$1" = "auto" ]; then
+        echo "The name '$1' is reserved!"
         exit 2
     fi
 
@@ -84,18 +81,18 @@ createTheme() {
         exit 2 
     fi
 
-    mkdir -p "$themesPath/$1/colors/"
-    "$generatorPath/theme-generator.sh" "$2" -o "$themesPath/$1/colors/" -f pghtr
+    mkdir -p "$managerPath/themes/$1/colors/"
+    "$managerPath/theme-generator.sh" "$2" -o "$managerPath/themes/$1/colors/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
-        createDefaultCss "$themesPath/$1/"
+        createDefaultCss "$managerPath/themes/$1/"
         echo "Successfully created theme '$1'"
     fi
 }
 
 updateTheme() {
-    if [ "$1" = "active" ]; then
-        echo "The name 'active' is reserved! It cannot be updated."
+    if [ "$1" = "active" ] || [ "$1" = "auto" ]; then
+        echo "The name '$1' is reserved! It cannot be updated."
         exit 2
     fi
     if ! [ -f "$2" ]; then
@@ -107,7 +104,7 @@ updateTheme() {
         printNoThemeFoundError "$1"
     fi
 
-    "$generatorPath/theme-generator.sh" "$2" -o "$themesPath/$1/colors/" -f pghtr
+    "$managerPath/theme-generator.sh" "$2" -o "$managerPath/themes/$1/colors/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         echo "Successfully updated theme '$1'"
@@ -124,15 +121,15 @@ deleteTheme() {
         printNoThemeFoundError "$1"
     fi
 
-    if [ -d "$themesPath/$1/" ]; then
-        rm -r "${themesPath:?}/$1/"
+    if [ -d "$managerPath/themes/$1/" ]; then
+        rm -r "${managerPath:?}/themes/$1/"
     fi
 
     echo "Successfully deleted theme '$1'"
 }
 
 listThemes() {
-    for theme in "$themesPath/"*; do
+    for theme in "$managerPath/themes/"*; do
         if [ -d "$theme/" ]; then
             themeName=$(basename "$theme")
             if ! [ "$themeName" = "active" ]; then
@@ -152,18 +149,16 @@ setTheme() {
         printNoThemeFoundError "$1"
     fi
 
-    if [ -d "$themesPath/active/" ]; then
-        mkdir -p "$themesPath/active/"
+    if [ -d "$managerPath/thems/active/" ]; then
+        mkdir -p "$managerPath/themes/active/"
     fi
-    rm -r "$themesPath/active/"
-    cp -r "$themesPath/$1/" "$themesPath/active/"
+    rm -r "$managerPath/themes/active/"
+    cp -r "$managerPath/themes/$1/" "$managerPath/themes/active/"
 
     if [ "$2" = "1" ]; then
-        "$applierPath/theme-applier.sh"
+        "$managerPath/theme-applier.sh"
     fi
-    "$applierPath"/theme-applier.sh
-    #killall waybar 
-    #waybar &
+    "$managerPath"/theme-applier.sh
 }
 
 printTooFewArguments() {
@@ -180,13 +175,13 @@ if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 
 # check if theme-generator is installed
-if ! [ -f "$generatorPath/theme-generator.sh" ]; then
+if ! [ -f "$managerPath/theme-generator.sh" ]; then
     echo "theme-generator is not installed"
     exit 3
 fi
 
 # check if theme-applier is installed
-if ! [ -f "$applierPath/theme-applier.sh" ]; then
+if ! [ -f "$managerPath/theme-applier.sh" ]; then
     echo "theme-applier is not installed"
     exit 3
 fi
