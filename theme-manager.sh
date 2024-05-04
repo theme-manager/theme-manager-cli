@@ -82,11 +82,14 @@ createTheme() {
     fi
 
     mkdir -p "$managerPath/themes/$1/colors/"
-    "$managerPath/theme-generator.sh" "$2" -o "$managerPath/themes/$1/colors/" -f pghtr
+    "$managerPath/theme-generator.sh" "$2" -o "$managerPath/themes/$1/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         createDefaultCss "$managerPath/themes/$1/"
         echo "Successfully created theme '$1'"
+    else 
+        rm -r "$managerPath/themes/$1/"
+        echo "Failed to create theme '$1'"
     fi
 }
 
@@ -132,8 +135,8 @@ listThemes() {
     for theme in "$managerPath/themes/"*; do
         if [ -d "$theme/" ]; then
             themeName=$(basename "$theme")
-            if ! [ "$themeName" = "active" ]; then
-                echo "$themeName"
+            if ! [ "$themeName" = "active" ] && ! [ "$themeName" = "auto" ]; then
+                echo " - $themeName"
             fi
         fi
     done
