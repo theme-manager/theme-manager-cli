@@ -20,7 +20,7 @@ Make sure that dependencies are installed.
 ## Installation
 To use the theme-manager you will first have to install the theme-generator.  
 Download the shell script and put it in your ```$HOME/.config/theme-manager``` directory.  
-Do the same for the theme-generator.  
+Do the same for the theme-applier.  
 
 ## Dependencies
 theme-generator: [https://github.com/theme-manager/theme-generator](https://github.com/theme-manager/theme-generator)  
