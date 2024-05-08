@@ -107,7 +107,14 @@ updateTheme() {
         printNoThemeFoundError "$1"
     fi
 
-    "$managerPath/theme-generator.sh" "$2" -o "$managerPath/themes/$1/colors/" -f pghtr
+    printf "Are you sure you want to update the theme '%s'? [y/N]: " "$1"
+    read -r sure
+    case "$sure" in
+        [yY][eE][sS]|[yY])  ;;
+        *) echo Aborting... && exit 0 ;;
+    esac
+
+    "$managerPath/theme-generator.sh" "$2" -o "$managerPath/themes/$1/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         echo "Successfully updated theme '$1'"
