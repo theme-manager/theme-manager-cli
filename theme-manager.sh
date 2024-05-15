@@ -9,7 +9,7 @@ Options:
     -d  --delete    <name>              Delete theme
     -h  --help                          Show this help message
     -l  --list                          List themes
-    -s  --set       <name> (apply)      Set theme, optionally apply wallpaper [1|0]
+    -s  --set       <name> (<apply>)    Set theme, optionally apply wallpaper [1]
     -u  --update    <name> <imagePath>  Update theme"
 }
 
@@ -166,12 +166,14 @@ setTheme() {
     cp -r "$managerPath/themes/$1/" "$managerPath/themes/active/"
 
     if [ "$2" = "1" ]; then
-        hyprState="$("$managerPath/theme-applier.sh -g hyprpaper")"
-        "$managerPath/theme-applier.sh -s hyprpaper off"
+        echo applying wallpaper...
         "$managerPath/theme-applier.sh"
-        "$managerPath/theme-applier.sh -s hyprpaper $hyprState"
     else 
-        "$managerPath"/theme-applier.sh
+        echo not applying wallpaper...
+        hyprState="$("$managerPath/theme-applier.sh" -g hyprpaper)"
+        "$managerPath/theme-applier.sh" -s hyprpaper off
+        "$managerPath/theme-applier.sh"
+        "$managerPath/theme-applier.sh" -s hyprpaper "$hyprState"
     fi
 }
 
@@ -222,7 +224,12 @@ while [ $# -gt 0 ]; do
         shift ;;
     -s | --set)
         [ "$2" = "" ] && printTooFewArguments "$1"
-        setTheme "$2" "$3"
+        if [ "$3" = "" ]; then
+            setTheme "$2"
+        else
+            setTheme "$2" "$3"
+            shift
+        fi
         shift 2 ;;
     *)
         echo "Unknown option: $1"
