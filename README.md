@@ -8,7 +8,7 @@ The installation is easy. Just put the shell script in your ```$HOME/.config/the
 Make sure that dependencies are installed.
 
 ## Usage
-    theme-manager.sh [OPTIONS]
+    theme-manager.sh [OPTION] ...
 
     Options:
         -c  --create    <name> <imagePath>  Create theme

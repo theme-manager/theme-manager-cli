@@ -3,7 +3,7 @@
 # functions
 printUsage() {
     echo "Usage:
-    theme-manager.sh [OPTIONS]
+    theme-manager.sh [OPTION] ...
 Options:
     -c  --create    <name> <imagePath>  Create theme
     -d  --delete    <name>              Delete theme
