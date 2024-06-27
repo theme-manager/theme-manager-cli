@@ -76,7 +76,11 @@ checkIfThemeExists() {
             themeExists=true
         fi
     done
-    return $themeExists
+    if [ "$themeExists" = "true" ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 createTheme() {
