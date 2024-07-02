@@ -162,13 +162,20 @@ setTheme() {
 
     if [ "$2" = "1" ]; then
         echo applying wallpaper...
-        "$managerPath/theme-applier"
+        "$managerPath/theme-applier" --auto-update
     else 
         echo not applying wallpaper...
+        # Save the old state
         hyprState="$("$managerPath/theme-applier" -g hyprpaper)"
-        "$managerPath/theme-applier" -s hyprpaper off
-        "$managerPath/theme-applier"
+        autoState="$("$managerPath/theme-applier" -g auto)"
+        # Set the variables
+        "$managerPath/theme-applier" -s hyprpaper false
+        "$managerPath/theme-applier" -s auto true
+        # Execute the theme-applier
+        "$managerPath/theme-applier" --auto-update
+        # Revert the variables to what they were before
         "$managerPath/theme-applier" -s hyprpaper "$hyprState"
+        "$managerPath/theme-applier" -s auto "$autoState"
     fi
 }
 
