@@ -96,7 +96,7 @@ Use the '--list' option to get all available themes."
     fi
 
     mkdir -p "$managerPath/themes/$1/colors/"
-    "$managerPath/theme-generator" "$2" -o "$managerPath/themes/$1/" -f pghtr
+    theme-generator -i "$2" -o "$managerPath/themes/$1/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         createDefaultCss "$managerPath/themes/$1/"
@@ -121,7 +121,7 @@ updateTheme() {
         *) printWarning "Aborting..." 0 ;;
     esac
 
-    "$managerPath/theme-generator" "$2" -o "$managerPath/themes/$1/" -f pghtr
+    theme-generator -i "$2" -o "$managerPath/themes/$1/" -f pghtr
     success=$?
     if [ "$success" = "0" ]; then
         echo "Successfully updated theme '$1'"
@@ -162,20 +162,20 @@ setTheme() {
 
     if [ "$2" = "1" ]; then
         echo applying wallpaper...
-        "$managerPath/theme-applier" --auto-update
+        theme-applier --auto-update
     else 
         echo not applying wallpaper...
         # Save the old state
-        hyprState="$("$managerPath/theme-applier" -g hyprpaper)"
-        autoState="$("$managerPath/theme-applier" -g auto)"
+        hyprState="$(theme-applier -g hyprpaper)"
+        autoState="$(theme-applier -g auto)"
         # Set the variables
-        "$managerPath/theme-applier" -s hyprpaper false
-        "$managerPath/theme-applier" -s auto true
+        theme-applier -s hyprpaper false
+        theme-applier -s auto true
         # Execute the theme-applier
-        "$managerPath/theme-applier" --auto-update
+        theme-applier --auto-update
         # Revert the variables to what they were before
-        "$managerPath/theme-applier" -s hyprpaper "$hyprState"
-        "$managerPath/theme-applier" -s auto "$autoState"
+        theme-applier -s hyprpaper "$hyprState"
+        theme-applier -s auto "$autoState"
     fi
 }
 
@@ -186,18 +186,14 @@ if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 
 # check if theme-generator is installed
-[ -f "$managerPath/theme-generator" ] || printErr 4 "theme-generator is not installed!"
-[ -x "$managerPath/theme-generator" ] || printErr 4 "theme-generator is not marked as executable!"
+which theme-generator >/dev/null 2>&1 || printErr 2 "theme-generator is not installed!"
 
 # check if theme-applier is installed
-[ -f "$managerPath/theme-applier" ] || printErr 4 "theme-applier is not installed!"
-[ -x "$managerPath/theme-applier" ] || printErr 4 "theme-applier is not marked as executable!"
+which theme-applier >/dev/null 2>&1 || printErr 4 "theme-applier is not installed!"
 
 # execute option
 while [ $# -gt 0 ]; do
     case "$1" in
-    -h | --help) 
-        printUsage && exit0 ;;
     -c | --create)
         [ $# -lt 3 ] && printTooFewArgumentsError "$1"
         createTheme "$2" "$3"
